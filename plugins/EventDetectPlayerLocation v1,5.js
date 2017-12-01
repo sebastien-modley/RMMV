@@ -6,7 +6,7 @@
 
 //-----------------------------------------------------------------------------
  /*:
- * @plugindesc v1.4 Detects the player's location in parallel to the event's location,
+ * @plugindesc v1.5 Detects the player's location in parallel to the event's location,
  * and checks the distance between the event and the player.
  * 
  * @author DaedraKyne
@@ -56,6 +56,9 @@
  * 
  * Version 1.03:
  * - this.playerVsThisEventDistance(distance); now checks in a circle (it checked in a square before)!
+ * 
+ * Version 1.05:
+ * - if you indicate 0 for one of eventVsEventDistance's events, it will select the player.
  */
 //----------------------------------------------------------------------------
 
@@ -115,7 +118,7 @@
         var distanceY = Math.abs(eventY - playerY);
         var trueDistance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2)) 
         var trueDistance = Math.ceil(trueDistance)
-        if(trueDistance < distance) {
+        if(trueDistance <= distance) {
             return true;
         } else {
             return false;
@@ -123,12 +126,24 @@
     };
 
     Game_Interpreter.prototype.eventVsEventDistance = function(distance, event1, event2) {
-        var Event1 = $gameMap.event(event1);
-        var Event2 = $gameMap.event(event2);
-        var Event1X = Event1._x;
-        var Event1Y = Event1._y;
-        var Event2X = Event2._x;
-        var Event2Y = Event2._y;
+        if (event1 == 0) {
+            var Event1 = $gamePlayer;
+            var Event1X = $gamePlayer.x;
+            var Event1Y = $gamePlayer.y;
+        } else {
+            var Event1 = $gameMap.event(event1);
+            var Event1X = Event1._x;
+            var Event1Y = Event1._y;
+        }
+        if (event2 == 0) {
+            var Event2 = $gamePlayer;
+            var Event2X = $gamePlayer.x;
+            var Event2Y = $gamePlayer.y;
+        } else {
+            var Event2 = $gameMap.event(event2);
+            var Event2X = Event2._x;
+            var Event2Y = Event2._y;
+        }
         var distanceX = Math.abs(Event1X - Event2X);
         var distanceY = Math.abs(Event1Y - Event2Y);
         var trueDistance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2)) 
