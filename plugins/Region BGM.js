@@ -860,18 +860,23 @@ AudioManager.playBgm({name: "Theme6", volume: 90, pitch: 100, pan: 0});
         currentPlayerRegionId = $gamePlayer.regionId();
         if (currentPlayerRegionId != playerRegionId && currentPlayerRegionId != 0) {
             playerRegionId = currentPlayerRegionId;
-            var region = JSON.parse(parameters["region " + String(currentPlayerRegionId)]);
-            console.log(region["fadeout time"], parseInt(region["fadeout time"]), region["Instant BGM"]);
-            if (region["Instant BGM"] == "true") {
-                AudioManager.playBgm({name: region["Region BGM Name"], volume: region["BGM volume"], pitch: region["BGM pitch"], pan: region["BGM pan"]});
-            }
-            else {
-                console.log("fading");
-                AudioManager.fadeOutBgm(parseInt(region["fadeout time"]));
-                waitTime = parseInt(region["fadeout time"]) * 60;
-                currentWaitTime += 1;
+            console.log(parameters["region " + String(currentPlayerRegionId)]);
+            if (parameters["region " + String(currentPlayerRegionId)] != "") {
+                var region = JSON.parse(parameters["region " + String(currentPlayerRegionId)]);
+                console.log(region["fadeout time"], parseInt(region["fadeout time"]), region["Instant BGM"]);
+                if (region["Instant BGM"] == "true") {
+                    AudioManager.playBgm({name: region["Region BGM Name"], volume: region["BGM volume"], pitch: region["BGM pitch"], pan: region["BGM pan"]});
+                }
+                else {
+                    console.log("fading");
+                    AudioManager.fadeOutBgm(parseInt(region["fadeout time"]));
+                    waitTime = parseInt(region["fadeout time"]) * 60;
+                    currentWaitTime += 1;
+                    
+                }
                 
             }
+            
         } else {
             if (currentWaitTime < waitTime) {
                 currentWaitTime += 1;
@@ -879,7 +884,7 @@ AudioManager.playBgm({name: "Theme6", volume: 90, pitch: 100, pan: 0});
             }
             else if (currentWaitTime == waitTime && waitTime != 0) {
                 console.log("Fading in bgm");
-                var region = JSON.parse(parameters["region " + String(currentPlayerRegionId)]);
+                var region = JSON.parse(parameters["region " + String(playerRegionId)]);
                 AudioManager.playBgm({name: region["Region BGM Name"], volume: region["BGM volume"], pitch: region["BGM pitch"], pan: region["BGM pan"]});
                 console.log(parseInt(region["fadein time"]));
                 AudioManager.fadeInBgm(parseInt(region["fadein time"]));
