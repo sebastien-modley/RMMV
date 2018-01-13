@@ -854,28 +854,74 @@ AudioManager.playBgm({name: "Theme6", volume: 90, pitch: 100, pan: 0});
     var currentPlayerRegionId = 0;
     var waitTime = 0;
     var currentWaitTime = 0;
+    var playerMapId = 0;
+    var currentPlayerMapId = 0;
+    var mapRegions = [];
+    var mapRegion = {};
+    var customed = false;
+
+    var i;
+
+
+    function processMapNotetags(group) {
+        var mapRegionNotetags = /map_region:[ ]*(\d+)[ ]+(\w+)[ ]+(\w+)[ ]+(\d+)[ ]+(\d+)[ ]+(\d+)[ ]+([a-z]+)[ ]+(\d+)[ ]+(\d+)/ig;
+        var note = group.note;
+        var regionIdsDat = [];
+
+        var match;
+        while ((match = mapRegionNotetags.exec(note))) {
+            regionIdsDat.push({
+                "Region Id": String(RegExp.$1),
+                "Region Name": String(RegExp.$2),
+                "Region BGM Name": String(RegExp.$3),
+                "BGM volume": String(RegExp.$4),
+                "BGM pitch": String(RegExp.$5),
+                "BGM pan": String(RegExp.$6),
+                "Instant BGM": String(RegExp.$7),
+                "fadeout time": String(RegExp.$8),
+                "fadein time": String(RegExp.$9)
+            })
+        }
+        return regionIdsDat;
+
+    }
+
 
     var _Scene_Map_Update = Scene_Map.prototype.update;
     Scene_Map.prototype.update = function() {
         currentPlayerRegionId = $gamePlayer.regionId();
+        currentPlayerMapId = $gameMap.mapId();
         if (currentPlayerRegionId != playerRegionId && currentPlayerRegionId != 0) {
+            if (currentPlayerMapId != playerMapId) {
+                console.log("SWITCHING MAP!");
+                var mapRegions = processMapNotetags($dataMap);
+                for (i = 0; i < mapRegions.length; i++) {
+                    if (parseInt(mapRegions[i]["Region Id"]) == currentPlayerRegionId) {
+                        mapRegion = mapRegions[i];
+                        customed = true;
+                    }
+                }
+            }
             playerRegionId = currentPlayerRegionId;
-            console.log(parameters["region " + String(currentPlayerRegionId)]);
-            if (parameters["region " + String(currentPlayerRegionId)] != "") {
+            if (parameters["region " + String(currentPlayerRegionId)] != "" && !customed) {
                 var region = JSON.parse(parameters["region " + String(currentPlayerRegionId)]);
-                console.log(region["fadeout time"], parseInt(region["fadeout time"]), region["Instant BGM"]);
-                if (region["Instant BGM"] == "true") {
-                    AudioManager.playBgm({name: region["Region BGM Name"], volume: region["BGM volume"], pitch: region["BGM pitch"], pan: region["BGM pan"]});
-                }
-                else {
-                    console.log("fading");
-                    AudioManager.fadeOutBgm(parseInt(region["fadeout time"]));
-                    waitTime = parseInt(region["fadeout time"]) * 60;
-                    currentWaitTime += 1;
-                    
-                }
+            }
+            else if (customed) {
+                var region = mapRegion;
+            }
+            console.log("region song is", region, region["Region BGM Name"]);
+            console.log(region["fadeout time"], parseInt(region["fadeout time"]), region["Instant BGM"]);
+            if (region["Instant BGM"] == "true") {
+                AudioManager.playBgm({name: region["Region BGM Name"], volume: region["BGM volume"], pitch: region["BGM pitch"], pan: region["BGM pan"]});
+            }
+            else {
+                console.log("fading");
+                AudioManager.fadeOutBgm(parseInt(region["fadeout time"]));
+                waitTime = parseInt(region["fadeout time"]) * 60;
+                currentWaitTime += 1;
                 
             }
+            
             
         } else {
             if (currentWaitTime < waitTime) {
@@ -884,12 +930,18 @@ AudioManager.playBgm({name: "Theme6", volume: 90, pitch: 100, pan: 0});
             }
             else if (currentWaitTime == waitTime && waitTime != 0) {
                 console.log("Fading in bgm");
-                var region = JSON.parse(parameters["region " + String(playerRegionId)]);
+                if (!customed) {
+                    var region = JSON.parse(parameters["region " + String(playerRegionId)]);
+                }
+                else if (customed) {
+                    var region = mapRegion;
+                }
                 AudioManager.playBgm({name: region["Region BGM Name"], volume: region["BGM volume"], pitch: region["BGM pitch"], pan: region["BGM pan"]});
                 console.log(parseInt(region["fadein time"]));
                 AudioManager.fadeInBgm(parseInt(region["fadein time"]));
                 waitTime = 0;
                 currentWaitTime = 0;
+                customed = false;
             }
         }
         _Scene_Map_Update.call(this);
