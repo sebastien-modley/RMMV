@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 //         DaedraKyne Plugins - Item Limit
 //                    -------
-//          EventDetectPlayerLocation.js
+//                  Limit item.js
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -71,30 +71,47 @@
 
     var parameters = PluginManager.parameters("Limit item");    
 
-    Game_Interpreter.prototype.bootLimit = function(type, param) {
-        for (i = 1; i < $dataItems.length; i++) {
-            var lim = parseInt($dataItems[i].meta.limit);
+
+    var _isDatabaseLoaded = DataManager.isDatabaseLoaded;
+    var loaded = false;
+    DataManager.isDatabaseLoaded = function () {
+        if (!_isDatabaseLoaded.call(this)) {
+            return false;
+        }
+
+
+        if (!loaded) {
+            bootLimit($dataItems, $dataWeapons, $dataArmors);
+            loaded = true;
+        }
+        return true;
+    };
+
+
+    function bootLimit(items, weapons, armors) {
+        for (i = 1; i < items.length; i++) {
+            var lim = parseInt(items[i].meta.limit);
             if (lim) {
-                $dataItems[i].limit = lim;           
+                items[i].limit = lim;           
             } else {
-                $dataItems[i].limit = Number(parameters["Default item limit"]);
+                items[i].limit = Number(parameters["Default item limit"]);
             }
         }
-        for (i = 1; i < $dataWeapons.length; i++) {
-            var lim = parseInt($dataWeapons[i].meta.limit);
+        for (i = 1; i < weapons.length; i++) {
+            var lim = parseInt(weapons[i].meta.limit);
             if (lim) {
-                $dataWeapons[i].limit = lim;    
+                weapons[i].limit = lim;    
             } else {
                 var lim = Number(parameters["Default weapon limit"]);
-                $dataWeapons[i].limit = lim;
+                weapons[i].limit = lim;
             }
         }
-        for (i = 1; i < $dataArmors.length; i++) {
-            var lim = parseInt($dataArmors[i].meta.limit);
+        for (i = 1; i < armors.length; i++) {
+            var lim = parseInt(armors[i].meta.limit);
             if (lim) {
-                $dataArmors[i].limit = lim;           
+                armors[i].limit = lim;           
             } else {
-                $dataWeapons[i].limit = Number(parameters["Default weapon limit"]);
+                armors[i].limit = Number(parameters["Default armor limit"]);
             }
         }
     }
