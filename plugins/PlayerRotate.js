@@ -24,6 +24,9 @@
  * @help
  * 
  * Instructions: Assign a mode and a key to block the player, making him only able to rotate on himself.
+ * Modes:
+ *  - Toggle: press the key to block the player, and press it again to unblock the player.
+ *  - Hold: hold the key to block the player, release it to unblock.
  * 
 //----------------------------------------------------------------------------
 */
