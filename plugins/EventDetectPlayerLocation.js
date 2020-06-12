@@ -118,6 +118,8 @@
         var distanceY = Math.abs(eventY - playerY);
         var trueDistance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2)) 
         var trueDistance = Math.ceil(trueDistance)
+        var v = $gameVariables._data;
+        distance = eval(distance);
         if(trueDistance <= distance) {
             return true;
         } else {
@@ -148,6 +150,8 @@
         var distanceY = Math.abs(Event1Y - Event2Y);
         var trueDistance = Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2)) 
         var trueDistance = Math.ceil(trueDistance)
+        var v = $gameVariables._data;
+        distance = eval(distance);
         if(trueDistance <= distance) {
             return true;
         } else {
